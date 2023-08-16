@@ -49,14 +49,14 @@ func getNewJournalName(jModel models.JournalModel, author string, name string) (
 }
 
 // TODO refactor to return error rather than panic with log.Fatal
-func InitApp() *Application {
+func InitApp(dbFilename string) *Application {
 	user, err := user.Current()
 	if err != nil {
 		log.Fatal("Could not establish username")
 	}
 	userName := user.Username
 
-	dirPath := filepath.Join("/", "Users", userName, ".journi")
+	dirPath := filepath.Join("/", "Users", userName, ".tuirnal")
 	_, err = os.ReadDir(dirPath)
 	if os.IsNotExist(err) {
 		err = os.Mkdir(dirPath, 0777)
@@ -66,10 +66,10 @@ func InitApp() *Application {
 	} else if err != nil {
 		log.Fatal(err.Error())
 	}
-	dbUrl := filepath.Join(dirPath, "journi.db") // TODO update to be portable; this is specific to MacOS
+	dbUrl := filepath.Join(dirPath, dbFilename) // TODO update to be portable; this is specific to MacOS
 	jDb, err := bbolt.Open(dbUrl, 0666, nil)
 	if err != nil {
-		log.Fatalf("Could not open journi.db file: %v", err)
+		log.Fatalf("Could not open "+dbFilename+" file: %v", err)
 	}
 
 	err = jDb.Update(func(tx *bbolt.Tx) error {

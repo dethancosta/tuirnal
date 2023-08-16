@@ -1,5 +1,5 @@
 BINARY_NAME=proto
-BIN_TUI=tui-app
+BIN_TUI=tuirnal
 
 build-proto:
 	go build -o ${BINARY_NAME} ./cmd/tui-proto
@@ -11,7 +11,7 @@ run-proto:
 clean-proto:
 	go clean
 	rm ${BINARY_NAME}
-	sudo rm -r ~/.journi
+	sudo rm -r ~/.tuirnal
 
 
 build:
@@ -32,4 +32,9 @@ run:
 clean:
 	go clean
 	rm ${BIN_TUI}
-	sudo rm -r ~/.journi
+	sudo rm ~/.tuirnal/tuirnal.db
+
+clean-r:
+	go clean
+	rm ${BIN_TUI}
+	sudo rm -r ~/.tuirnal

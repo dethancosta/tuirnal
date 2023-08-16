@@ -31,7 +31,7 @@ type model struct {
 
 func initialModel() model {
 
-	app := *helpers.InitApp()
+	app := *helpers.InitApp("tuirnal.db")
 
 	return model{
 		App:            app,
