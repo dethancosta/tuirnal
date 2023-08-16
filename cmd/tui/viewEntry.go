@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/muesli/reflow/wordwrap"
 )
 
 type viewEntryModel struct {
@@ -74,7 +75,7 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 					}
 					vem.TitleInput.Blur()
 					vem.Title = je.Title
-					vem.Vp.SetContent(je.Content)
+					vem.Vp.SetContent(wordwrap.String(je.Content, vem.Vp.Width))
 					vem.Tags = strings.Join(je.Tags, ", ")
 					vem.ReadingMode = true
 				} else {
