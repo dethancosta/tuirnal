@@ -20,5 +20,5 @@ func updateEntries(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 
 func entriesView(m model) string {
 	//TODO implement
-	return "🏗️ This page is under construction 🏗️"
+	return "🏗️  This page is under construction 🏗️"
 }

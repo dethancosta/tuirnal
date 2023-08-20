@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -70,7 +73,16 @@ func updateLogin(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				lm.NameTi.Blur()
 				lm.PasswordTi.Reset()
 				lm.PasswordTi.Blur()
+
+				journals, err := m.App.JournalModel.GetAllJournals(strings.ToLower(m.CurrentAuthor))
+				if err != nil {
+					m.JournalChoice.Message = fmt.Sprintf("Couldn't load journals for user:\n%s", err.Error())
+				} else {
+					m.JournalChoice.SetJournalsCache(journals)
+				}
 				lm.SelectIdx = 0
+			} else {
+				lm.Message = "Username or password is incorrect."
 			}
 
 		} else if lm.SelectIdx == 3 {
@@ -131,7 +143,7 @@ func loginView(m model) string {
 	st += lm.NameTi.View() + "\n\n"
 	st += lm.PasswordTi.View() + "\n\n"
 	st += selected(lm, 2, "Log In") + "\n\n"
-	st += selected(lm, 3, "Sign Up")
+	st += selected(lm, 3, "Sign Up") + "\n\n"
 	st += lm.Message
 
 	return st

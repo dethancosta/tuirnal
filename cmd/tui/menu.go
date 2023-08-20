@@ -35,6 +35,7 @@ func updateMenu(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		mp.SelectIdx = 0
 		m.CurrentAuthor = ""
 		m.CurrentJournal = ""
+		m.JournalChoice.ExistingJournals = nil
 		m.ViewIdx = LoginIdx
 	case "down", "j":
 		mp.SelectIdx++
@@ -59,6 +60,7 @@ func updateMenu(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			}
 		} else if mp.SelectIdx == 2 {
 			m.ViewIdx = ViewEntryIdx
+			m.ViewEntry.TitleInput.Focus()
 		} else {
 			m.ViewIdx = ViewJournalIdx
 		}

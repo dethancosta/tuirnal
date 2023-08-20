@@ -1,7 +1,6 @@
 package helpers
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -22,30 +21,6 @@ type Application struct {
 
 func timeString(t time.Time) string {
 	return fmt.Sprintf("%s %d, %d", t.Month().String(), t.Day(), t.Year())
-}
-
-func getNewJournalName(jModel models.JournalModel, author string, name string) (string, error) {
-	j, err := jModel.Get(author, name)
-	var NoJournalError *models.NoJournalError
-	if errors.As(err, &NoJournalError) {
-		err = jModel.Insert(author, name)
-		if err != nil {
-			return "", err
-		}
-	} else if err != nil {
-		return "", err
-	}
-
-	for j != nil {
-		fmt.Println("A journal with that name already exists. Please give a different name")
-		fmt.Scanln(&name)
-		j, err = jModel.Get(author, name)
-		if err != nil && !errors.Is(err, &models.NoJournalError{}) {
-			return "", err
-		}
-	}
-
-	return name, nil
 }
 
 // TODO refactor to return error rather than panic with log.Fatal

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
@@ -73,23 +74,28 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	st := ""
 	if m.ViewIdx != LoginIdx {
-		st += m.CurrentAuthor + " || " + m.CurrentJournal + "\n\n\n"
+		st += m.CurrentAuthor + " || "
+		if len(strings.TrimSpace(m.CurrentJournal)) > 0 {
+			st += m.CurrentJournal + "\n\n\n"
+		} else {
+			st += "*No journal selected*" + "\n\n\n"
+		}
 	} else {
 		st += "\n\n\n"
 	}
 
 	switch m.ViewIdx {
-	case 0:
+	case LoginIdx:
 		st += loginView(m)
-	case 1:
+	case MenuIdx:
 		st += menuView(m)
-	case 2:
+	case JournalChoiceIdx:
 		st += journalChoiceView(m)
-	case 3:
+	case NewEntryIdx:
 		st += writeEntryView(m)
-	case 4:
+	case ViewEntryIdx:
 		st += viewEntryView(m)
-	case 5:
+	case ViewJournalIdx:
 		st += entriesView(m)
 	}
 	return st

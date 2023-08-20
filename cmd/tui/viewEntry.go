@@ -6,17 +6,19 @@ import (
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/dethancosta/tuirnal/internal/models"
 	"github.com/muesli/reflow/wordwrap"
 )
 
 type viewEntryModel struct {
 	// CreatedAt string
-	Tags        string
-	Title       string
-	Vp          viewport.Model
-	TitleInput  textinput.Model
-	Message     string
-	ReadingMode bool
+	Tags         string
+	Title        string
+	Vp           viewport.Model
+	TitleInput   textinput.Model
+	Message      string
+	ReadingMode  bool
+	EntriesCache []*models.JournalEntry
 }
 
 func initViewEntry() viewEntryModel {
@@ -24,12 +26,13 @@ func initViewEntry() viewEntryModel {
 	ti := textinput.New()
 	ti.Prompt = "Title: "
 	return viewEntryModel{
-		Tags:        "",
-		Title:       "",
-		Vp:          vp,
-		TitleInput:  ti,
-		Message:     "",
-		ReadingMode: false,
+		Tags:         "",
+		Title:        "",
+		Vp:           vp,
+		TitleInput:   ti,
+		Message:      "",
+		ReadingMode:  false,
+		EntriesCache: nil,
 	}
 }
 
@@ -45,17 +48,17 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			case "k", "up":
 				vem.Vp.Update(vem.Vp.KeyMap.HalfPageUp)
 			case "q":
+				vem.TitleInput.Focus()
 				vem.Title = ""
 				vem.Tags = ""
 				vem.Vp.SetContent("")
-				m.ViewIdx = MenuIdx
+				vem.ReadingMode = false
 			}
 		}
 		vem.Vp, cmd = vem.Vp.Update(msg)
 		return m, cmd
 
 	} else {
-		vem.TitleInput.Focus()
 		if kt, ok := msg.(tea.KeyMsg); ok {
 			switch kt.String() {
 			case "enter":
@@ -81,13 +84,12 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				} else {
 					vem.Message = "No entry with that title."
 				}
-			case "q":
+			case "ctrl+c":
 				vem.TitleInput.Blur()
 				m.ViewIdx = MenuIdx
-			default:
-				vem.TitleInput, cmd = vem.TitleInput.Update(msg)
 			}
 		}
+		vem.TitleInput, cmd = vem.TitleInput.Update(msg)
 	}
 	return m, cmd
 }
@@ -100,8 +102,32 @@ func viewEntryView(m model) string {
 			vem.Tags
 		return st
 	} else {
-		return vem.TitleInput.View() + "\n\n" + vem.Message
+		searchList := vem.getSearchList()
+
+		return vem.TitleInput.View() + "\n\n" + vem.Message + "\n\n" + searchList
 	}
+}
+
+func (vem *viewEntryModel) getSearchList() string {
+	titles := make([]string, len(vem.EntriesCache))
+	for i, e := range vem.EntriesCache {
+		titles[i] = e.Title
+	}
+
+	sb := strings.Builder{}
+	search := strings.ToLower(vem.TitleInput.Value())
+	for i := range titles {
+		tLower := strings.ToLower(titles[i])
+		if strings.HasPrefix(tLower, search) {
+			//TODO get appropriate entry from db
+			sb.WriteString(titles[i] + "\n")
+		}
+	}
+	return sb.String()
+}
+
+func (vem *viewEntryModel) SetCache(cache []*models.JournalEntry) {
+	vem.EntriesCache = cache
 }
 
 // for testing purposes

@@ -40,10 +40,10 @@ func journalNameAvailable(app helpers.Application, name, author string) bool {
 	return false
 }
 
-func createJournal(app helpers.Application, name, author string) error {
+func createJournal(app helpers.Application, author, name string) error {
 
 	if journalNameAvailable(app, name, author) {
-		err := app.JournalModel.Insert(author, name)
+		err := app.JournalModel.Insert(strings.ToLower(author), name)
 		return err
 	} else {
 		return errors.New("Journal name taken")

@@ -75,15 +75,15 @@ func (m *JournalModel) Get(authorName string, name string) (*Journal, error) {
 
 func (m *JournalModel) GetAllJournals(author string) ([]*Journal, error) {
 
-	journals := make([]*Journal, 0, 4)
+	journals := make([]*Journal, 0)
 
-	var tempJournal Journal
 	err := m.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("journals")).Cursor()
 		if b == nil {
 			return &NoJournalError{}
 		}
 		for k, v := b.Seek([]byte(author)); k != nil && bytes.HasPrefix(k, []byte(author)); k, v = b.Next() {
+			var tempJournal Journal
 			err := json.Unmarshal(v, &tempJournal)
 			if err != nil {
 				return err
