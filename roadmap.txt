@@ -3,6 +3,7 @@
 [x] write tui with bubble-tea
 [ ] !! implement read-journal page
 [ ] !! refactor file creation/storage
+[ ] include command hints at bottom of each page
 [ ] Include date of creation in entryView
 [x] Include list of entries in current journal for entryView
 [ ] Make it prettier and fluid with charmbracelet/lipgloss
