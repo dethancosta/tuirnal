@@ -100,21 +100,19 @@ func updateLogin(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				m.ViewIdx = MenuIdx
 			}
 		}
-	case "tab":
+
+	case "tab", "down":
 		lm.SelectIdx++
 		if lm.SelectIdx > 3 {
 			lm.SelectIdx = 3
 		}
-	case "down":
-		lm.SelectIdx++
-		if lm.SelectIdx > 3 {
-			lm.SelectIdx = 3
-		}
+
 	case "up":
 		lm.SelectIdx--
 		if lm.SelectIdx < 0 {
 			lm.SelectIdx = 0
 		}
+
 	default:
 		if lm.NameTi.Focused() {
 			lm.NameTi, cmd = lm.NameTi.Update(msg)
