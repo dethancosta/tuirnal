@@ -32,6 +32,7 @@ func updateMenu(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		lp.NameTi.Reset()
 		lp.PasswordTi.Reset()
 		lp.NameTi.Focus()
+		lp.SelectIdx = 0
 		mp.SelectIdx = 0
 		m.CurrentAuthor = ""
 		m.CurrentJournal = ""

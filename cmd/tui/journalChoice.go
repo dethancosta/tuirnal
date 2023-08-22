@@ -42,7 +42,6 @@ func initJournalChoice() journalChoiceModel {
 func journalChoiceView(m model) string {
 	jc := &m.JournalChoice
 	st := "Which journal would you like to use?\n" +
-		"(Giving a new name will create a new journal)\n\n" +
 		jc.ChoiceTi.View() + "\n" +
 		jc.Message + "\n\n" +
 		jc.SelectionString()
