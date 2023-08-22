@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	LoginIdx         = 0
-	MenuIdx          = 1
-	JournalChoiceIdx = 2
-	NewEntryIdx      = 3
-	ViewEntryIdx     = 4
-	ViewJournalIdx   = 5
+	LoginIdx         = iota
+	MenuIdx
+	JournalChoiceIdx
+	NewEntryIdx
+	ViewEntryIdx
+	ViewJournalIdx
 )
 
 type model struct {
