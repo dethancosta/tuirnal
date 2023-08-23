@@ -1,4 +1,4 @@
-### To Do List
+## To Do List
 - [x] migrate to bbolt (boltdb)
 - [x] write basic cli
 - [x] write tui with bubble-tea
@@ -16,7 +16,7 @@
 - [ ] add option to encrypt journal and/or journal entries
 - [ ] add ability to create/use templates (with prompts, or for a coffee journal, etc.)
 
-## Long Term Goals...
+### Long Term Goals...
 - [ ] move from json serialization to protocol buffers
 - [ ] introduce vector db integration to query & chat with your journal
 - [ ] introduce markdown write/display
