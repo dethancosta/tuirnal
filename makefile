@@ -32,7 +32,7 @@ run:
 clean:
 	go clean
 	rm ${BIN_TUI}
-	sudo rm ~/.tuirnal/tuirnal.db
+	sudo rm "~/Library/Application Support/tuirnal/tuirnal.db"
 
 clean-r:
 	go clean

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/user"
-	"path/filepath"
+	//"os/user"
+	//"path/filepath"
 	"time"
 
 	"github.com/dethancosta/tuirnal/internal/models"
+	gap "github.com/muesli/go-app-paths"
 	"go.etcd.io/bbolt"
 )
 
@@ -25,23 +26,24 @@ func timeString(t time.Time) string {
 
 // TODO refactor to return error rather than panic with log.Fatal
 func InitApp(dbFilename string) *Application {
-	user, err := user.Current()
-	if err != nil {
-		log.Fatal("Could not establish username")
-	}
-	userName := user.Username
-
-	dirPath := filepath.Join("/", "Users", userName, ".tuirnal")
+	scope := gap.NewScope(gap.User, "tuirnal")
+	dirPath, err := scope.DataPath("")
 	_, err = os.ReadDir(dirPath)
+
 	if os.IsNotExist(err) {
 		err = os.Mkdir(dirPath, 0777)
 		if err != nil {
-			log.Fatalf("Could not establish journi files directory: %v", err)
+			log.Fatalf("Could not establish tuirnal files directory: %v", err)
 		}
 	} else if err != nil {
 		log.Fatal(err.Error())
 	}
-	dbUrl := filepath.Join(dirPath, dbFilename) // TODO update to be portable; this is specific to MacOS
+
+	dbUrl, err := scope.DataPath(dbFilename)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	jDb, err := bbolt.Open(dbUrl, 0666, nil)
 	if err != nil {
 		log.Fatalf("Could not open "+dbFilename+" file: %v", err)

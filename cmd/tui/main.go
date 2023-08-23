@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	LoginIdx         = iota
+	LoginIdx = iota
 	MenuIdx
 	JournalChoiceIdx
 	NewEntryIdx
