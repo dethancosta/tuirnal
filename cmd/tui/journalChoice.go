@@ -57,7 +57,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 
 	if km, ok := msg.(tea.KeyMsg); ok {
 		switch km.String() {
-		case "ctrl+c":
+		case "esc", "ctrl+c":
 			jc.ChoiceTi.Blur()
 			jc.ChoiceTi.Reset()
 			jc.SelectIdx = 0

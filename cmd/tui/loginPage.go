@@ -67,6 +67,7 @@ func updateLogin(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			if !ok && err != nil {
 				lm.Message = "Author with that username doesn't exist."
 			} else if ok {
+				lm.Message = ""
 				m.ViewIdx = MenuIdx
 				m.CurrentAuthor = lm.NameTi.Value()
 				lm.NameTi.Reset()
