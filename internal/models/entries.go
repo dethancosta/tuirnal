@@ -75,15 +75,15 @@ func (m *EntryModel) Get(author, journal, name string) (*JournalEntry, error) {
 
 func (m *EntryModel) GetAllEntries(author, journal string) ([]*JournalEntry, error) {
 
-	entries := make([]*JournalEntry, 0, 4)
+	entries := make([]*JournalEntry, 0)
 	err := m.DB.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte("entries")).Cursor()
 		if b == nil {
 			return &NoBucketError{}
 		}
 		keyPfx := append([]byte(author), []byte(journal)...)
-		var tempEntry JournalEntry
 		for k, v := b.Seek(keyPfx); k != nil && bytes.HasPrefix(k, keyPfx); k, v = b.Next() {
+			var tempEntry JournalEntry
 			err := json.Unmarshal(v, &tempEntry)
 			if err != nil {
 				return err

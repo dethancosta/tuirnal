@@ -2,6 +2,7 @@ package main
 
 import (
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
@@ -47,7 +48,7 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				vem.Vp.Update(vem.Vp.KeyMap.HalfPageDown)
 			case "k", "up":
 				vem.Vp.Update(vem.Vp.KeyMap.HalfPageUp)
-			case "q":
+			case "esc":
 				vem.TitleInput.Focus()
 				vem.Title = ""
 				vem.Tags = ""
@@ -110,18 +111,18 @@ func viewEntryView(m model) string {
 
 func (vem *viewEntryModel) getSearchList() string {
 	titles := make([]string, len(vem.EntriesCache))
-	for i, e := range vem.EntriesCache {
-		titles[i] = e.Title
+	for i := range vem.EntriesCache {
+		titles[i] = vem.EntriesCache[i].Title + "\t" + vem.EntriesCache[i].WrittenAt.Format(time.DateTime)
 	}
 
 	sb := strings.Builder{}
-	search := strings.ToLower(vem.TitleInput.Value())
+	//search := strings.ToLower(vem.TitleInput.Value())
 	for i := range titles {
-		tLower := strings.ToLower(titles[i])
-		if strings.HasPrefix(tLower, search) {
-			//TODO get appropriate entry from db
-			sb.WriteString(titles[i] + "\n")
-		}
+		//tLower := strings.ToLower(titles[i])
+		//if strings.HasPrefix(tLower, search) {
+		//TODO get appropriate entry from db
+		sb.WriteString(titles[i] + "\n")
+		//}
 	}
 	return sb.String()
 }

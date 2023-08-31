@@ -2,10 +2,9 @@
 - [x] migrate to bbolt (boltdb)
 - [x] write basic cli
 - [x] write tui with bubble-tea
+- [x] refactor file creation/storage
 - [ ] !! implement read-journal page
-- [ ] !! refactor file creation/storage
-	- [x] use github.com/muesli/go-app-paths
-- [ ] include command hints at bottom of each page
+- [ ] !! include command hints at bottom of each page
 - [ ] Include date of creation in entryView
 - [x] Include list of entries in current journal for entryView
 - [ ] Make it prettier and fluid with charmbracelet/lipgloss

@@ -57,6 +57,7 @@ func updateLogin(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 
 	switch msg.(tea.KeyMsg).String() {
 	case "ctrl+c", "esc":
+		m.ViewEntry.EntriesCache = nil
 		return m, tea.Quit
 	case "enter":
 		name := lm.NameTi.Value()

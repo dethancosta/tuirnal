@@ -62,6 +62,7 @@ func updateWriteEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg.(tea.KeyMsg).String() {
+
 	case "esc":
 		m.ViewIdx = MenuIdx
 		wep.TitleTi.Reset()
@@ -72,6 +73,7 @@ func updateWriteEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		wep.TagsTi.Blur()
 		wep.Message = ""
 		wep.SelectIdx = 0
+
 	case "ctrl+s":
 		if len(strings.TrimSpace(wep.TitleTi.Value())) == 0 {
 			wep.Message = "Please enter a title for the entry."
@@ -95,21 +97,29 @@ func updateWriteEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 					wep.Message = "Couldn't save the entry :("
 				} else {
 					wep.Message = "Entry saved successfully."
+					newCacheEntry, err := m.App.EntryModel.Get(m.CurrentAuthor, m.CurrentJournal, wep.TitleTi.Value())
+					if err != nil {
+						wep.Message += " Couldn't update cache."
+					}
+					m.ViewEntry.SetCache(append(m.ViewEntry.EntriesCache, newCacheEntry))
 				}
 			} else {
 				wep.Message = "This title is already taken."
 			}
 		}
+
 	case "down":
 		wep.SelectIdx++
 		if wep.SelectIdx > 2 {
 			wep.SelectIdx = 2
 		}
+
 	case "up":
 		wep.SelectIdx--
 		if wep.SelectIdx < 0 {
 			wep.SelectIdx = 0
 		}
+
 	default:
 		if wep.TitleTi.Focused() {
 			wep.TitleTi, cmd = wep.TitleTi.Update(msg)

@@ -63,6 +63,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			jc.SelectIdx = 0
 			jc.Message = ""
 			m.ViewIdx = MenuIdx
+
 		case "enter":
 			i := jc.SelectIdx
 			if i == 0 {
@@ -88,7 +89,12 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				m.CurrentJournal = jc.ExistingJournals[i-1]
 				jc.ChoiceTi.Reset()
 				jc.Message = "Now using journal " + m.CurrentJournal
+				entries, err := m.App.EntryModel.GetAllEntries(m.CurrentAuthor, m.CurrentJournal)
+				if err == nil {
+					m.ViewEntry.SetCache(entries)
+				}
 			}
+
 		case "down":
 			jc.SelectIdx++
 			if jc.SelectIdx > len(jc.ExistingJournals) {
@@ -99,6 +105,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			} else {
 				jc.ChoiceTi.Blur()
 			}
+
 		case "up":
 			jc.SelectIdx--
 			if jc.SelectIdx < 0 {
@@ -109,6 +116,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 			} else {
 				jc.ChoiceTi.Blur()
 			}
+
 		default:
 			jc.ChoiceTi, cmd = jc.ChoiceTi.Update(msg)
 			return m, cmd
