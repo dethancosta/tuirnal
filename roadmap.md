@@ -5,11 +5,12 @@
 - [x] refactor file creation/storage
 - [ ] !! implement read-journal page
 - [ ] !! include command hints at bottom of each page
-- [ ] Include date of creation in entryView
+- [x] Include date of creation in entryView
 - [x] Include list of entries in current journal for entryView
 - [ ] Make it prettier and fluid with charmbracelet/lipgloss
 - [ ] Switch from bbolt to sqlite
 - [ ] rewrite to better handle tags for querying
+	- [ ] ? migrate to sqlite
 	- [ ] make separate 'tags' bucket
 	- [ ] make separate 'entryTags' bucket to grab entry ids
 - [ ] add option to encrypt journal and/or journal entries
@@ -21,4 +22,3 @@
 - [ ] introduce markdown write/display
 - [ ] add ability to listen to entries as TTS?
 - [ ] add ability to upload handwritten notes with OCR
-
