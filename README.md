@@ -12,7 +12,7 @@ This project is currently a barebones MVP, with much more functionality on the r
 It should currently only work on Unix-like systems due to the way the storage file is saved; I've only tested it on my Macbook.
 You can read the roadmap.txt file in this repository for a to-do list of features.
 The tasks with the highest priority right now:
-- refactor file creation/storage to be cross-platform (Windows/Mac/Linux)
 - better authentication and the option to encrypt journals/entries
 - a prettier, more fluid TUI. Most likely with [lipgloss](https://github.com/charmbracelet/lipgloss)
 - better support for searching with and using tags
+- hints for key bindings/navigation
