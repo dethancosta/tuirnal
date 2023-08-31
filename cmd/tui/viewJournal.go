@@ -11,7 +11,7 @@ func updateEntries(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	if mt, ok := msg.(tea.KeyMsg); ok {
 		kmsg := mt.String()
 		switch kmsg {
-		case "q":
+		case "esc":
 			m.ViewIdx = MenuIdx
 		}
 	}

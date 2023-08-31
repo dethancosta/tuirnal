@@ -26,7 +26,7 @@ func updateMenu(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	}
 
 	switch msg.(tea.KeyMsg).String() {
-	case "q":
+	case "esc":
 		// TODO sign out
 		lp := &m.Login
 		lp.NameTi.Reset()

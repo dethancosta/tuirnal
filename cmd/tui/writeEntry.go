@@ -62,7 +62,7 @@ func updateWriteEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 
 	switch msg.(tea.KeyMsg).String() {
-	case "ctrl+c":
+	case "esc":
 		m.ViewIdx = MenuIdx
 		wep.TitleTi.Reset()
 		wep.TitleTi.Blur()

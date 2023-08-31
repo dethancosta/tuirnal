@@ -84,7 +84,7 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				} else {
 					vem.Message = "No entry with that title."
 				}
-			case "ctrl+c":
+			case "esc":
 				vem.TitleInput.Blur()
 				m.ViewIdx = MenuIdx
 			}
