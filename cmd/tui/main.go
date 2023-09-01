@@ -74,9 +74,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m model) View() string {
 	st := ""
 	if m.ViewIdx != LoginIdx {
-		st += m.CurrentAuthor + " || "
+		st += "👤 " + m.CurrentAuthor + " || "
 		if len(strings.TrimSpace(m.CurrentJournal)) > 0 {
-			st += m.CurrentJournal + "\n\n\n"
+			st += "📖 " + m.CurrentJournal + "\n\n\n"
 		} else {
 			st += "*No journal selected*" + "\n\n\n"
 		}

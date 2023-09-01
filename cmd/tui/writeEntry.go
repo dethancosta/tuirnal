@@ -3,10 +3,38 @@ package main
 import (
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textarea"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
+
+var WeKeyMap = struct {
+	Up   key.Binding
+	Down key.Binding
+	Save key.Binding
+	Quit key.Binding
+}{
+	Up: key.NewBinding( //up
+		key.WithKeys("up"),
+		key.WithHelp("↑", "move up"),
+	),
+
+	Down: key.NewBinding( //down
+		key.WithKeys("down"),
+		key.WithHelp("↓", "move down"),
+	),
+
+	Save: key.NewBinding( //ctrl+s
+		key.WithKeys("ctrl+s"),
+		key.WithHelp("ctrl+s", "save"),
+	),
+
+	Quit: key.NewBinding( //esc
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "quit"),
+	),
+}
 
 type WriteEntry struct {
 	TitleTi   textinput.Model
@@ -50,84 +78,86 @@ func initWriteEntry() WriteEntry {
 func updateWriteEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	wep := &m.WriteEntryPage
 
-	if _, ok := msg.(tea.KeyMsg); !ok {
+	var cmd tea.Cmd
+
+	switch msg := msg.(type) {
+
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, WeKeyMap.Quit):
+			m.ViewIdx = MenuIdx
+			wep.TitleTi.Reset()
+			wep.TitleTi.Blur()
+			wep.EntryTa.Reset()
+			wep.EntryTa.Blur()
+			wep.TagsTi.Reset()
+			wep.TagsTi.Blur()
+			wep.Message = ""
+			wep.SelectIdx = 0
+
+		case key.Matches(msg, WeKeyMap.Save):
+			if len(strings.TrimSpace(wep.TitleTi.Value())) == 0 {
+				wep.Message = "Please enter a title for the entry."
+			} else {
+				ok := entryNameAvailable(
+					m.App,
+					m.CurrentAuthor,
+					m.CurrentJournal,
+					wep.TitleTi.Value(),
+				)
+
+				if ok {
+					err := saveJournalEntry(
+						m.App,
+						m.CurrentAuthor,
+						m.CurrentJournal,
+						wep.TitleTi.Value(),
+						wep.TagsTi.Value(),
+						wep.EntryTa.Value(),
+					)
+					if err != nil {
+						wep.Message = "Couldn't save the entry :("
+					} else {
+						wep.Message = "Entry saved successfully."
+						newCacheEntry, err := m.App.EntryModel.Get(m.CurrentAuthor, m.CurrentJournal, wep.TitleTi.Value())
+						if err != nil {
+							wep.Message += " Couldn't update cache."
+						}
+						m.ViewEntry.SetCache(append(m.ViewEntry.EntriesCache, newCacheEntry))
+					}
+				} else {
+					wep.Message = "This title is already taken."
+				}
+			}
+
+		case key.Matches(msg, WeKeyMap.Down):
+			wep.SelectIdx++
+			if wep.SelectIdx > 2 {
+				wep.SelectIdx = 2
+			}
+
+		case key.Matches(msg, WeKeyMap.Up):
+			wep.SelectIdx--
+			if wep.SelectIdx < 0 {
+				wep.SelectIdx = 0
+			}
+
+		default:
+			if wep.TitleTi.Focused() {
+				wep.TitleTi, cmd = wep.TitleTi.Update(msg)
+			} else if wep.EntryTa.Focused() {
+				wep.EntryTa, cmd = wep.EntryTa.Update(msg)
+			} else {
+				wep.TagsTi, cmd = wep.TagsTi.Update(msg)
+			}
+		}
+	default:
 		cmds := make([]tea.Cmd, 3)
 		wep.EntryTa, cmds[0] = wep.EntryTa.Update(msg)
 		wep.TitleTi, cmds[1] = wep.TitleTi.Update(msg)
 		wep.TagsTi, cmds[2] = wep.TagsTi.Update(msg)
 
 		return m, tea.Batch(cmds...)
-	}
-
-	var cmd tea.Cmd
-
-	switch msg.(tea.KeyMsg).String() {
-
-	case "esc":
-		m.ViewIdx = MenuIdx
-		wep.TitleTi.Reset()
-		wep.TitleTi.Blur()
-		wep.EntryTa.Reset()
-		wep.EntryTa.Blur()
-		wep.TagsTi.Reset()
-		wep.TagsTi.Blur()
-		wep.Message = ""
-		wep.SelectIdx = 0
-
-	case "ctrl+s":
-		if len(strings.TrimSpace(wep.TitleTi.Value())) == 0 {
-			wep.Message = "Please enter a title for the entry."
-		} else {
-			ok := entryNameAvailable(
-				m.App,
-				m.CurrentAuthor,
-				m.CurrentJournal,
-				wep.TitleTi.Value(),
-			)
-			if ok {
-				err := saveJournalEntry(
-					m.App,
-					m.CurrentAuthor,
-					m.CurrentJournal,
-					wep.TitleTi.Value(),
-					wep.TagsTi.Value(),
-					wep.EntryTa.Value(),
-				)
-				if err != nil {
-					wep.Message = "Couldn't save the entry :("
-				} else {
-					wep.Message = "Entry saved successfully."
-					newCacheEntry, err := m.App.EntryModel.Get(m.CurrentAuthor, m.CurrentJournal, wep.TitleTi.Value())
-					if err != nil {
-						wep.Message += " Couldn't update cache."
-					}
-					m.ViewEntry.SetCache(append(m.ViewEntry.EntriesCache, newCacheEntry))
-				}
-			} else {
-				wep.Message = "This title is already taken."
-			}
-		}
-
-	case "down":
-		wep.SelectIdx++
-		if wep.SelectIdx > 2 {
-			wep.SelectIdx = 2
-		}
-
-	case "up":
-		wep.SelectIdx--
-		if wep.SelectIdx < 0 {
-			wep.SelectIdx = 0
-		}
-
-	default:
-		if wep.TitleTi.Focused() {
-			wep.TitleTi, cmd = wep.TitleTi.Update(msg)
-		} else if wep.EntryTa.Focused() {
-			wep.EntryTa, cmd = wep.EntryTa.Update(msg)
-		} else {
-			wep.TagsTi, cmd = wep.TagsTi.Update(msg)
-		}
 	}
 
 	if wep.SelectIdx == 0 {
@@ -153,6 +183,20 @@ func writeEntryView(m model) string {
 	st += wep.EntryTa.View() + "\n"
 	st += wep.TagsTi.View() + "\n\n"
 	st += wep.Message
+	st += helpStyle(weHelpString())
+
+	return st
+}
+
+func weHelpString() string {
+	st := WeKeyMap.Up.Help().Key + ": "
+	st += WeKeyMap.Up.Help().Desc + ",  "
+	st += WeKeyMap.Down.Help().Key + ": "
+	st += WeKeyMap.Down.Help().Desc + ",  "
+	st += WeKeyMap.Save.Help().Key + ": "
+	st += WeKeyMap.Save.Help().Desc + ",  "
+	st += WeKeyMap.Quit.Help().Key + ": "
+	st += WeKeyMap.Quit.Help().Desc + "\n"
 
 	return st
 }

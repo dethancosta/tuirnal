@@ -4,6 +4,7 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dethancosta/tuirnal/internal/helpers"
 )
 
@@ -107,3 +108,5 @@ func selected(m SelectorModel, idx int, s string) string {
 	res += s
 	return res
 }
+
+var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render

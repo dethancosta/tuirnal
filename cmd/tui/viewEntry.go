@@ -4,6 +4,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -20,6 +21,51 @@ type viewEntryModel struct {
 	Message      string
 	ReadingMode  bool
 	EntriesCache []*models.JournalEntry
+}
+
+var VeReadingKeyMap = KeyMap{
+
+	Up: key.NewBinding(
+		key.WithKeys("k", "up"),
+		key.WithHelp("k/↑", "move up"),
+	),
+
+	Down: key.NewBinding(
+		key.WithKeys("j", "down"),
+		key.WithHelp("j/↓", "move down"),
+	),
+
+	Select: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "select"),
+	),
+
+	Quit: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "quit"),
+	),
+}
+
+var VeSelectKeyMap = KeyMap{
+	Up: key.NewBinding(
+		key.WithKeys("up"),
+		key.WithHelp("↑", "move up"),
+	),
+
+	Down: key.NewBinding(
+		key.WithKeys("down"),
+		key.WithHelp("↓", "move down"),
+	),
+
+	Select: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "select"),
+	),
+
+	Quit: key.NewBinding(
+		key.WithKeys("esc"),
+		key.WithHelp("esc", "quit"),
+	),
 }
 
 func initViewEntry() viewEntryModel {
@@ -41,14 +87,16 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	vem := &m.ViewEntry
 	var cmd tea.Cmd
 	if vem.ReadingMode {
-		if mt, ok := msg.(tea.KeyMsg); ok {
-			kmsg := mt.String()
-			switch kmsg {
-			case "j", "down":
+		switch msg := msg.(type) {
+
+		case tea.KeyMsg:
+			switch {
+
+			case key.Matches(msg, VeReadingKeyMap.Down):
 				vem.Vp.Update(vem.Vp.KeyMap.HalfPageDown)
-			case "k", "up":
+			case key.Matches(msg, VeReadingKeyMap.Up):
 				vem.Vp.Update(vem.Vp.KeyMap.HalfPageUp)
-			case "esc":
+			case key.Matches(msg, VeReadingKeyMap.Quit):
 				vem.TitleInput.Focus()
 				vem.Title = ""
 				vem.Tags = ""
@@ -60,9 +108,11 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 		return m, cmd
 
 	} else {
-		if kt, ok := msg.(tea.KeyMsg); ok {
-			switch kt.String() {
-			case "enter":
+		switch msg := msg.(type) {
+		case tea.KeyMsg:
+			switch {
+			//TODO implement up and down to select entries in list
+			case key.Matches(msg, VeSelectKeyMap.Select):
 				exists := !entryNameAvailable(
 					m.App,
 					m.CurrentAuthor,
@@ -85,7 +135,8 @@ func updateViewEntry(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				} else {
 					vem.Message = "No entry with that title."
 				}
-			case "esc":
+
+			case key.Matches(msg, VeSelectKeyMap.Quit):
 				vem.TitleInput.Blur()
 				m.ViewIdx = MenuIdx
 			}
@@ -101,11 +152,11 @@ func viewEntryView(m model) string {
 		st := vem.Title + "\n\n" +
 			vem.Vp.View() + "\n\n" +
 			vem.Tags
-		return st
+		return st + helpStyle(m.ViewEntry.veHelpString())
 	} else {
 		searchList := vem.getSearchList()
 
-		return vem.TitleInput.View() + "\n\n" + vem.Message + "\n\n" + searchList
+		return vem.TitleInput.View() + "\n\n" + vem.Message + "\n\n" + searchList + helpStyle(m.ViewEntry.veHelpString())
 	}
 }
 
@@ -129,6 +180,30 @@ func (vem *viewEntryModel) getSearchList() string {
 
 func (vem *viewEntryModel) SetCache(cache []*models.JournalEntry) {
 	vem.EntriesCache = cache
+}
+
+func (vem viewEntryModel) veHelpString() string {
+	var st string
+
+	if vem.ReadingMode {
+		st += VeReadingKeyMap.Up.Help().Key + ": "
+		st += VeReadingKeyMap.Up.Help().Desc + ",  "
+		st += VeReadingKeyMap.Down.Help().Key + ": "
+		st += VeReadingKeyMap.Down.Help().Desc + ",  "
+		st += VeReadingKeyMap.Quit.Help().Key + ": "
+		st += VeReadingKeyMap.Quit.Help().Desc + "\n"
+	} else {
+		st += VeSelectKeyMap.Up.Help().Key + ": "
+		st += VeSelectKeyMap.Up.Help().Desc + ",  "
+		st += VeSelectKeyMap.Down.Help().Key + ": "
+		st += VeSelectKeyMap.Down.Help().Desc + ",  "
+		st += VeSelectKeyMap.Select.Help().Key + ": "
+		st += VeSelectKeyMap.Select.Help().Desc + ",  "
+		st += VeSelectKeyMap.Quit.Help().Key + ": "
+		st += VeSelectKeyMap.Quit.Help().Desc + "\n"
+	}
+
+	return st
 }
 
 // for testing purposes

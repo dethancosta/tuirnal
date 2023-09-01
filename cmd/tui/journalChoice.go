@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dethancosta/tuirnal/internal/models"
@@ -21,6 +22,29 @@ type journalChoiceModel struct {
 // journalChoiceModel satisfies the SelectorModel interface
 func (cm journalChoiceModel) GetSelection() int {
 	return cm.SelectIdx
+}
+
+var JcKeyMap = KeyMap{
+
+	Up: key.NewBinding(
+		key.WithKeys("up"),
+		key.WithHelp("↑", "move up"),
+	),
+
+	Down: key.NewBinding(
+		key.WithKeys("tab", "down"),
+		key.WithHelp("⇥/↓", "move down"),
+	),
+
+	Select: key.NewBinding(
+		key.WithKeys("enter"),
+		key.WithHelp("enter", "select"),
+	),
+
+	Quit: key.NewBinding(
+		key.WithKeys("esc", "ctrl+c"),
+		key.WithHelp("esc/ctrl+c", "quit"),
+	),
 }
 
 func initJournalChoice() journalChoiceModel {
@@ -44,7 +68,8 @@ func journalChoiceView(m model) string {
 	st := "Which journal would you like to use?\n" +
 		jc.ChoiceTi.View() + "\n" +
 		jc.Message + "\n\n" +
-		jc.SelectionString()
+		jc.SelectionString() +
+		helpStyle(jcHelpString())
 
 	return st
 }
@@ -55,20 +80,22 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	jc := &m.JournalChoice
 	var cmd tea.Cmd
 
-	if km, ok := msg.(tea.KeyMsg); ok {
-		switch km.String() {
-		case "esc", "ctrl+c":
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch {
+		case key.Matches(msg, JcKeyMap.Quit):
 			jc.ChoiceTi.Blur()
 			jc.ChoiceTi.Reset()
 			jc.SelectIdx = 0
 			jc.Message = ""
 			m.ViewIdx = MenuIdx
 
-		case "enter":
+		case key.Matches(msg, JcKeyMap.Select):
 			i := jc.SelectIdx
 			if i == 0 {
 				if journalNameAvailable(m.App, m.CurrentAuthor, jc.ChoiceTi.Value()) {
 					err := createJournal(m.App, m.CurrentAuthor, jc.ChoiceTi.Value())
+
 					if err != nil {
 						jc.Message = fmt.Sprintf("Couldn't create journal: %s", err.Error())
 					} else {
@@ -76,6 +103,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 						jc.Message = "Journal created. You are now using it."
 						m.CurrentJournal = jc.ChoiceTi.Value()
 					}
+
 				} else {
 					m.CurrentJournal = jc.ChoiceTi.Value()
 					jc.Message = "Now using journal " + m.CurrentJournal
@@ -85,6 +113,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 					}
 				}
 				jc.ChoiceTi.Reset()
+
 			} else {
 				m.CurrentJournal = jc.ExistingJournals[i-1]
 				jc.ChoiceTi.Reset()
@@ -95,7 +124,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				}
 			}
 
-		case "down":
+		case key.Matches(msg, JcKeyMap.Down):
 			jc.SelectIdx++
 			if jc.SelectIdx > len(jc.ExistingJournals) {
 				jc.SelectIdx = len(jc.ExistingJournals)
@@ -106,7 +135,7 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				jc.ChoiceTi.Blur()
 			}
 
-		case "up":
+		case key.Matches(msg, JcKeyMap.Up):
 			jc.SelectIdx--
 			if jc.SelectIdx < 0 {
 				jc.SelectIdx = 0
@@ -145,4 +174,17 @@ func (cm *journalChoiceModel) SetJournalsCache(journals []*models.Journal) {
 		cache[i] = journals[i].Name
 	}
 	cm.ExistingJournals = cache
+}
+
+func jcHelpString() string {
+	st := JcKeyMap.Up.Help().Key + ": "
+	st += JcKeyMap.Up.Help().Desc + ",  "
+	st += JcKeyMap.Down.Help().Key + ": "
+	st += JcKeyMap.Down.Help().Desc + ",  "
+	st += JcKeyMap.Select.Help().Key + ": "
+	st += JcKeyMap.Select.Help().Desc + ",  "
+	st += JcKeyMap.Quit.Help().Key + ": "
+	st += JcKeyMap.Quit.Help().Desc + "\n"
+
+	return st
 }

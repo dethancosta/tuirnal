@@ -7,7 +7,6 @@ import (
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/charmbracelet/lipgloss"
 )
 
 type KeyMap struct {
@@ -46,8 +45,6 @@ var DefaultKeyMap = KeyMap{
 		key.WithHelp("esc/ctrl+c", "quit"),
 	),
 }
-
-var helpStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("241")).Render
 
 func (m loginModel) GetSelection() int {
 	return m.SelectIdx
