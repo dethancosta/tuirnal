@@ -16,6 +16,7 @@
 	- [ ] make separate 'entryTags' bucket to grab entry ids
 - [ ] add option to encrypt journal and/or journal entries
 - [ ] add ability to create/use templates (with prompts, or for a coffee journal, etc.)
+- [ ] !! encrypt passwords
 
 ### Long Term Goals...
 - [ ] move from json serialization to protocol buffers
