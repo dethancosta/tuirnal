@@ -13,13 +13,13 @@ type AuthorModel struct {
 	DB *bolt.DB
 }
 
-func (m *AuthorModel) Insert(username, password string) error {
+func (m *AuthorModel) Insert(username string, passwordHash []byte) error {
 	err := m.DB.Update(func(tx *bolt.Tx) error {
 		b, err := tx.CreateBucketIfNotExists([]byte("authors"))
 		if err != nil {
 			return err
 		}
-		err = b.Put([]byte(username), []byte(password))
+		err = b.Put([]byte(username), passwordHash)
 		if err != nil {
 			return err
 		}

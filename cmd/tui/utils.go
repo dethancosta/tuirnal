@@ -5,7 +5,9 @@ import (
 	"strings"
 
 	"github.com/charmbracelet/lipgloss"
+	"github.com/dethancosta/tuirnal/internal/auth"
 	"github.com/dethancosta/tuirnal/internal/helpers"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // entryNameValidator returns true if the title is available in the given journal,
@@ -53,18 +55,10 @@ func createJournal(app helpers.Application, author, name string) error {
 
 // loginAuthor attempts to sign a user in, and returns true if successful
 func loginAuthor(app helpers.Application, author, password string) (bool, error) {
-	authObj, err := app.AuthorModel.Get(author)
-	//TODO check that err is NoAuthorErr
-	if err != nil {
-		return false, err
-	} else {
-		//TODO hash password and check
-		if authObj.Password == password {
-			return true, nil
-		}
-	}
 
-	return false, nil
+	// TODO return author object
+	_, err := auth.Authenticate(app, author, password)
+	return err == nil, err
 }
 
 // authorNameAvailable checks whether an account with a given username exists
@@ -85,7 +79,11 @@ func createAuthor(app helpers.Application, author string, password string) error
 		return errors.New("Author with that username already exists")
 	}
 	//TODO include error checking in case err isn't NoAuthorErr
-	err = app.AuthorModel.Insert(author, password)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	err = app.AuthorModel.Insert(author, hashedPassword)
 	if err != nil {
 		return err
 	}
