@@ -1,7 +1,11 @@
 package auth
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
 	"fmt"
+	"io"
 
 	"github.com/dethancosta/tuirnal/internal/helpers"
 	"github.com/dethancosta/tuirnal/internal/models"
@@ -21,4 +25,51 @@ func Authenticate(app helpers.Application, username, password string) (*models.A
 	}
 
 	return user, nil
+}
+
+func encryptEntry(password string, entryJson []byte) ([]byte, error) {
+	key := []byte(password)
+
+	cipherBlock, err := aes.NewCipher(key)
+
+	if err != nil {
+		return nil, fmt.Errorf("Couldn't encrypt entry: %w", err)
+	}
+
+	cipherText := make([]byte, aes.BlockSize+len(entryJson))
+
+	iv := cipherText[:aes.BlockSize]
+
+	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
+		return nil, fmt.Errorf("Couldn't encrypt entry: %w", err)
+	}
+
+	stream := cipher.NewCFBDecrypter(cipherBlock, iv)
+
+	stream.XORKeyStream(cipherText[aes.BlockSize:], entryJson)
+
+	return cipherText, nil
+}
+
+func decryptEntry(password string, encryptedJson []byte) ([]byte, error) {
+	key := []byte(password)
+
+	cipherBlock, err := aes.NewCipher(key)
+	if err != nil {
+		return nil, fmt.Errorf("Can't decrypt entry: %w", err)
+	}
+
+	if len(encryptedJson) < aes.BlockSize {
+		return nil, fmt.Errorf("Text is too short")
+	}
+
+	iv := encryptedJson[:aes.BlockSize]
+
+	encryptedJson = encryptedJson[aes.BlockSize:]
+
+	stream := cipher.NewCFBDecrypter(cipherBlock, iv)
+
+	stream.XORKeyStream(encryptedJson, encryptedJson)
+
+	return encryptedJson, nil
 }
