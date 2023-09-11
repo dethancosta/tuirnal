@@ -8,11 +8,9 @@ Features:
 - written in Go, using charmbracelet's [bubbletea](https://github.com/charmbracelet/bubbletea) for the TUI
 - multiple user profiles, each with multiple journals
 
-This project is currently a barebones MVP, with much more functionality on the roadmap.
-It should currently only work on Unix-like systems due to the way the storage file is saved; I've only tested it on my Macbook.
+This project is currently a barebones MVP, with more functionality on the roadmap.
 You can read the roadmap.txt file in this repository for a to-do list of features.
 The tasks with the highest priority right now:
 - better authentication and the option to encrypt journals/entries
 - a prettier, more fluid TUI. Most likely with [lipgloss](https://github.com/charmbracelet/lipgloss)
 - better support for searching with and using tags
-- hints for key bindings/navigation
