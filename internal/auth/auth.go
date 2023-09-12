@@ -27,7 +27,7 @@ func Authenticate(app helpers.Application, username, password string) (*models.A
 	return user, nil
 }
 
-func encryptEntry(password string, entryJson []byte) ([]byte, error) {
+func EncryptEntry(password string, entryJson []byte) ([]byte, error) {
 	key := []byte(password)
 
 	cipherBlock, err := aes.NewCipher(key)
@@ -51,7 +51,7 @@ func encryptEntry(password string, entryJson []byte) ([]byte, error) {
 	return cipherText, nil
 }
 
-func decryptEntry(password string, encryptedJson []byte) ([]byte, error) {
+func DecryptEntry(password string, encryptedJson []byte) ([]byte, error) {
 	key := []byte(password)
 
 	cipherBlock, err := aes.NewCipher(key)

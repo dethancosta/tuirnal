@@ -78,7 +78,6 @@ func createAuthor(app helpers.Application, author string, password string) error
 	if !ok {
 		return errors.New("Author with that username already exists")
 	}
-	//TODO include error checking in case err isn't NoAuthorErr
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

@@ -57,10 +57,9 @@ func initLogin() loginModel {
 	n.Prompt = "Username: "
 	n.Placeholder = "..."
 
-	//TODO format password input appropriately
 	p := textinput.New()
 	p.CharLimit = 32
-	p.Width = 32
+	p.Width = 32 // TODO make flexible
 	p.Prompt = "Password: "
 	p.Placeholder = "..."
 	p.EchoMode = textinput.EchoPassword
