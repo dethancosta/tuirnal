@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/bubbles/key"
-	"github.com/charmbracelet/bubbles/list"
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/dethancosta/tuirnal/internal/models"
@@ -13,22 +13,28 @@ import (
 // journalChoiceModel holds the model for the page wherein a journal
 // is chosen
 type journalChoiceModel struct {
-	// ChoiceTi         textinput.Model // TODO delete
-	NewJournalTi textinput.Model
-	// ExistingJournals []string // TODO delete
-	ExistingJournals list.Model
+	ChoiceTi         textinput.Model
+	ExistingJournals []string
 	Message          string
-	NewJournalMode   bool
+	SelectIdx        int
 }
 
-// journalItem is used in the ExistingJournals list
-type journalItem struct {
-	title string
+// journalChoiceModel satisfies the SelectorModel interface
+func (cm journalChoiceModel) GetSelection() int {
+	return cm.SelectIdx
 }
-
-func (j journalItem) FilterValue() string { return j.title }
 
 var JcKeyMap = KeyMap{
+
+	Up: key.NewBinding(
+		key.WithKeys("up"),
+		key.WithHelp("↑", "move up"),
+	),
+
+	Down: key.NewBinding(
+		key.WithKeys("tab", "down"),
+		key.WithHelp("⇥/↓", "move down"),
+	),
 
 	Select: key.NewBinding(
 		key.WithKeys("enter"),
@@ -46,12 +52,12 @@ func initJournalChoice() journalChoiceModel {
 	cti.CharLimit = 50
 	cti.Width = 32 //TODO change to be flexible
 	cti.Prompt = "Name: "
-	cti.Placeholder = "New journal name..."
+	cti.Placeholder = "Journal name..."
 	return journalChoiceModel{
-		NewJournalTi:     cti,
-		ExistingJournals: list.New(nil, list.NewDefaultDelegate(), 0, 0),
+		ChoiceTi:         cti,
+		ExistingJournals: nil,
 		Message:          "",
-		NewJournalMode:   false,
+		SelectIdx:        0,
 	}
 }
 
@@ -62,7 +68,7 @@ func journalChoiceView(m model) string {
 	st := "Which journal would you like to use?\n" +
 		jc.ChoiceTi.View() + "\n" +
 		jc.Message + "\n\n" +
-		jc.ExistingJournals.View() +
+		jc.SelectionString() +
 		helpStyle(jcHelpString())
 
 	return st
@@ -72,7 +78,7 @@ func journalChoiceView(m model) string {
 // the JournalChoice page is active.
 func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 	jc := &m.JournalChoice
-	var cmds []tea.Cmd
+	var cmd tea.Cmd
 
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -93,14 +99,13 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 					if err != nil {
 						jc.Message = fmt.Sprintf("Couldn't create journal: %s", err.Error())
 					} else {
-						jc.ExistingJournals.InsertItem(journalItem{title: jc.ChoiceTi.Value()})
 						jc.ExistingJournals = append(jc.ExistingJournals, jc.ChoiceTi.Value())
 						jc.Message = "Journal created. You are now using it."
 						m.CurrentJournal = jc.ChoiceTi.Value()
 					}
 
 				} else {
-					m.CurrentJournal = jc.ExistingJournals.SelectedItem().FilterValue()
+					m.CurrentJournal = jc.ChoiceTi.Value()
 					jc.Message = "Now using journal " + m.CurrentJournal
 					entries, err := m.App.EntryModel.GetAllEntries(m.CurrentAuthor, m.CurrentJournal)
 					if err == nil {
@@ -119,42 +124,58 @@ func updateJournalChoice(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 				}
 			}
 
+		case key.Matches(msg, JcKeyMap.Down):
+			jc.SelectIdx++
+			if jc.SelectIdx > len(jc.ExistingJournals) {
+				jc.SelectIdx = len(jc.ExistingJournals)
+			}
+			if jc.SelectIdx == 0 {
+				jc.ChoiceTi.Focus()
+			} else {
+				jc.ChoiceTi.Blur()
+			}
+
+		case key.Matches(msg, JcKeyMap.Up):
+			jc.SelectIdx--
+			if jc.SelectIdx < 0 {
+				jc.SelectIdx = 0
+			}
+			if jc.SelectIdx == 0 {
+				jc.ChoiceTi.Focus()
+			} else {
+				jc.ChoiceTi.Blur()
+			}
+
 		default:
-			var cmd tea.Cmd
-
 			jc.ChoiceTi, cmd = jc.ChoiceTi.Update(msg)
-			cmds = append(cmds, cmd)
-			jc.ExistingJournals, cmd = jc.ExistingJournals.Update(msg)
-			cmds = append(cmds, cmd)
-
-			return m, tea.Batch(cmds...)
+			return m, cmd
 		}
-	case tea.WindowSizeMsg:
-		jc.ExistingJournals.SetSize(msg.Width, msg.Height)
 	}
-	var cmd tea.Cmd
 	jc.ChoiceTi, cmd = jc.ChoiceTi.Update(msg)
-	cmds = append(cmds, cmd)
+	return m, cmd
+}
 
-	jc.ExistingJournals, cmd = jc.ExistingJournals.Update(msg)
-	cmds = append(cmds, cmd)
+// helper
 
-	return m, tea.Batch(cmds...)
+// SelectionString is a helper function that formats the
+// list of journals in a JournalChoice model
+func (cm journalChoiceModel) SelectionString() string {
+	sb := strings.Builder{}
+	for i, s := range cm.ExistingJournals {
+		sb.WriteString(selected(cm, i+1, s) + "\n")
+	}
+
+	return sb.String() + "\n"
 }
 
 func (cm *journalChoiceModel) SetJournalsCache(journals []*models.Journal) {
-	cache := make([]list.Item, len(journals))
+	cache := make([]string, len(journals))
 	for i := range journals {
-		cache[i] = journalItem{
-			title: journals[i].Name,
-		}
+		cache[i] = journals[i].Name
 	}
-
-	cm.ExistingJournals = list.New(cache, list.NewDefaultDelegate(), 0, 0)
-	cm.ExistingJournals.Title = "Choose a journal"
+	cm.ExistingJournals = cache
 }
 
-/*
 func jcHelpString() string {
 	st := JcKeyMap.Up.Help().Key + ": "
 	st += JcKeyMap.Up.Help().Desc + ",  "
@@ -167,4 +188,3 @@ func jcHelpString() string {
 
 	return st
 }
-*/

@@ -124,6 +124,7 @@ func updateLogin(msg tea.Msg, m model) (tea.Model, tea.Cmd) {
 					lm.NameTi.Blur()
 					lm.PasswordTi.Reset()
 					lm.PasswordTi.Blur()
+					lm.Message = ""
 
 					m.ViewIdx = MenuIdx
 				}
