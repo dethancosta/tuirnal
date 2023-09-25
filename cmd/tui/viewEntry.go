@@ -151,7 +151,7 @@ func viewEntryView(m model) string {
 	if vem.ReadingMode {
 		st := vem.Title + "\n\n" +
 			vem.Vp.View() + "\n\n" +
-			vem.Tags
+			vem.Tags + "🏷️ : \n\n"
 		return st + helpStyle(m.ViewEntry.veHelpString())
 	} else {
 		searchList := vem.getSearchList()
