@@ -151,7 +151,7 @@ func viewEntryView(m model) string {
 	if vem.ReadingMode {
 		st := vem.Title + "\n\n" +
 			vem.Vp.View() + "\n\n" +
-			vem.Tags + "🏷️ : \n\n"
+			"🏷️ : " + vem.Tags + "\n\n"
 		return st + helpStyle(m.ViewEntry.veHelpString())
 	} else {
 		searchList := vem.getSearchList()
@@ -162,18 +162,23 @@ func viewEntryView(m model) string {
 
 func (vem *viewEntryModel) getSearchList() string {
 	titles := make([]string, len(vem.EntriesCache))
+	formatLength := 0
 	for i := range vem.EntriesCache {
-		titles[i] = vem.EntriesCache[i].Title + "\t" + vem.EntriesCache[i].WrittenAt.Format(time.DateTime)
+		if len(vem.EntriesCache[i].Title) > formatLength {
+			formatLength = len(vem.EntriesCache[i].Title)
+		}
+	}
+
+	for i := range vem.EntriesCache {
+		padding := formatLength - len(vem.EntriesCache[i].Title)
+		titles[i] = vem.EntriesCache[i].Title +
+			strings.Repeat(" ", padding) + "\t" +
+			vem.EntriesCache[i].WrittenAt.Format(time.DateTime)
 	}
 
 	sb := strings.Builder{}
-	//search := strings.ToLower(vem.TitleInput.Value())
 	for i := range titles {
-		//tLower := strings.ToLower(titles[i])
-		//if strings.HasPrefix(tLower, search) {
-		//TODO get appropriate entry from db
 		sb.WriteString(titles[i] + "\n")
-		//}
 	}
 	return sb.String()
 }
