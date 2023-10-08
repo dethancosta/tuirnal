@@ -15,9 +15,9 @@
 	- [ ] ? migrate to sqlite
 	- [ ] make separate 'tags' bucket
 	- [ ] make separate 'entryTags' bucket to grab entry ids
-- [ ] add option to encrypt journal and/or journal entries
 - [ ] add ability to create/use templates (with prompts, or for a coffee journal, etc.)
-- [ ] !! encrypt passwords
+- [ ] change page message to be between top status bar and main content, with coloured text
+- [x] !! encrypt passwords
 
 ### Long Term Goals...
 - [ ] introduce vector db integration to query & chat with your journal
