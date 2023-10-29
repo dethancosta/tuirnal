@@ -12,7 +12,7 @@
 - [ ] Check for and deny blank titles/names
 - [ ] Make it prettier and resizable with charmbracelet/lipgloss
 - [ ] rewrite to better handle tags for querying
-	- [ ] ? migrate to sqlite
+	- [ ] ? migrate to sqlite (modernc.org/sqlite)
 	- [ ] make separate 'tags' bucket
 	- [ ] make separate 'entryTags' bucket to grab entry ids
 - [ ] add ability to create/use templates (with prompts, or for a coffee journal, etc.)
